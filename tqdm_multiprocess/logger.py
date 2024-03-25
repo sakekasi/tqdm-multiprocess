@@ -64,7 +64,7 @@ def setup_logger_child_process(message_queue):
 
     # create queue handler
     child_process_handler = ChildProcessHandler(message_queue)
-    child_process_handler.setLevel(logging.INFO)
+    child_process_handler.setLevel(logging.DEBUG)
     logger.addHandler(child_process_handler)
 
 class TqdmHandler(logging.StreamHandler):

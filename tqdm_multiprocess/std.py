@@ -50,6 +50,30 @@ def handler(signal_received, frame):
     global terminate
     terminate = True
 
+def get_extras(record: logging.LogRecord):
+    dict = record.__dict__.copy()
+    del dict['name']
+    del dict['msg']
+    del dict['args']
+    del dict['exc_info']
+    del dict['exc_text']
+    del dict['levelname']
+    del dict['levelno']
+    del dict['pathname']
+    del dict['filename']
+    del dict['module']
+    del dict['stack_info']
+    del dict['lineno']
+    del dict['funcName']
+    del dict['created']
+    del dict['msecs']
+    del dict['relativeCreated']
+    del dict['thread']
+    del dict['threadName']
+    del dict['processName']
+    del dict['process']
+    return dict
+
 # Signal handling for multiprocess. The "correct" answer doesn't work on windows at all.
 # Using the version with a very slight race condition. Don't ctrl-c in that miniscule time window...
 # https://stackoverflow.com/questions/11312525/catch-ctrlc-sigint-and-exit-multiprocesses-gracefully-in-python
@@ -91,7 +115,8 @@ class TqdmMultiProcessPool(object):
             # Worker Logging
             try:
                 logger_record = self.logging_queue.get_nowait()
-                getattr(logger, logger_record.levelname.lower())(logger_record.getMessage())
+                logger = logging.getLogger(logger_record.name)
+                getattr(logger, logger_record.levelname.lower())(logger_record.getMessage(), extra=get_extras(logger_record))
             except (EmptyQueue, InterruptedError):
                 pass
 
